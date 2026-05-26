@@ -1,0 +1,19 @@
+{
+  "name": "Queen P. en Provence 2026",
+  "short_name": "Été 2026",
+  "description": "France Summer 2026 trip planner",
+  "start_url": "/France-2026/",
+  "scope": "/France-2026/",
+  "display": "standalone",
+  "background_color": "#fdf8e8",
+  "theme_color": "#f5e6c8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%231c1b29'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='110' font-family='serif'>🇫🇷</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
