@@ -1593,6 +1593,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
 .map-pin:hover { transform: scale(1.15); }
 .map-pin.wedding { background: #8b1a1a; }
 .map-pin.provence { background: #c07030; }
+.map-pin.solo { background: #6b8c5e; }
 .map-popup-inner { font-family: 'Karla', sans-serif; min-width: 160px; }
 .map-popup-inner strong { font-family: 'Cormorant Garamond', serif;
   font-size: 16px; color: #1c1b29; display: block; margin-bottom: 2px; }
@@ -3380,8 +3381,8 @@ loadNotes();
 // ── TRIP MAP ──
 var MAP_STOPS = [
   { label:'Paris',          sub:'Jun 26 · Arrives. Aug 1–5 · Grand Finale 🗼', lat:48.856, lng:2.352,  cls:'' },
-  { label:'Prat-Bonrepaux', sub:'Jun 27 · Family in the Pyrenees ⛰️',          lat:43.085, lng:1.065,  cls:'' },
-  { label:'Toulouse',       sub:'Jun 30 · City stopover 🏙️',                   lat:43.604, lng:1.444,  cls:'' },
+  { label:'Prat-Bonrepaux', sub:'Jun 27 · Family in the Pyrenees ⛰️',          lat:43.085, lng:1.065,  cls:'solo' },
+  { label:'Toulouse',       sub:'Jun 30 · City stopover 🏙️',                   lat:43.604, lng:1.444,  cls:'solo' },
   { label:'Avignon',        sub:'Jul 2–17 · Provence home base 🏰',            lat:43.949, lng:4.805,  cls:'provence' },
   { label:'Sanary-sur-Mer', sub:'Jul 18 · Drive to the coast 💒',              lat:43.119, lng:5.800,  cls:'wedding' },
   { label:'Toulon',         sub:'Jul 19 · THE WEDDING 5 PM 💍🎉',              lat:43.124, lng:5.928,  cls:'wedding' },
@@ -3441,7 +3442,7 @@ function initLeafletMap() {
   // Numbered pins with popups
   MAP_STOPS.forEach(function(stop, i) {
     var icon = L.divIcon({
-      html: '<div class="map-pin ' + stop.cls + '"><span>' + (i + 1) + '</span></div>',
+      html: '<div class="map-pin ' + stop.cls + '"></div>',
       className: '',
       iconSize: [30, 30],
       iconAnchor: [15, 15],
