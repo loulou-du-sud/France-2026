@@ -329,10 +329,9 @@ section.visible { display: block; }
   color: var(--stone); margin-bottom: 3px;
 }
 .day-context {
-  font-family: 'Karla', sans-serif;
-  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--stone);
-  line-height: 1.2; margin-bottom: 4px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 20px; font-weight: 400; color: var(--ink); line-height: 1.2;
+  margin-bottom: 2px;
 }
 .day-desc {
   font-family: 'Cormorant Garamond', serif; font-style: italic;
@@ -4600,6 +4599,19 @@ function toggleDayHeaderEdit(btn) {
   var form   = dayRow.querySelector('.day-header-edit-form');
   if (form.style.display === 'none' || form.style.display === '') {
     var title = dayRow.querySelector('.day-card-title');
+    var ctxEl = title.querySelector('.day-context');
+    // Inject context row once if this day has a context line
+    if (ctxEl && !form.querySelector('.dhe-ctx-row')) {
+      var ctxRow = document.createElement('div');
+      ctxRow.className = 'dhe-row dhe-ctx-row';
+      ctxRow.innerHTML = '<label>Context</label><input class="dhe-ctx" placeholder="Context line…"/>';
+      form.insertBefore(ctxRow, form.firstChild);
+    }
+    var ctxRow = form.querySelector('.dhe-ctx-row');
+    if (ctxRow) {
+      if (ctxEl) { form.querySelector('.dhe-ctx').value = ctxEl.textContent || ''; }
+      else { ctxRow.style.display = 'none'; }
+    }
     form.querySelector('.dhe-desc').value = (title.querySelector('.day-desc')     || {}).textContent || '';
     form.querySelector('.dhe-loc').value  = (title.querySelector('.day-location') || {}).textContent || '';
     form.style.display = 'block';
@@ -4617,17 +4629,20 @@ function saveDayHeader(btn) {
   var detEl   = dayRow.querySelector('[id^="dynamic-details-"]');
   var dayId   = detEl ? detEl.id.replace('dynamic-details-', '') : null;
 
+  var ctxInput = form.querySelector('.dhe-ctx');
+  var ctx  = ctxInput ? ctxInput.value.trim() : null;
   var desc = form.querySelector('.dhe-desc').value.trim();
   var loc  = form.querySelector('.dhe-loc').value.trim();
 
   var title = dayRow.querySelector('.day-card-title');
+  if (ctx !== null && title.querySelector('.day-context'))  title.querySelector('.day-context').textContent  = ctx;
   if (desc && title.querySelector('.day-desc'))     title.querySelector('.day-desc').textContent     = desc;
   if (loc  && title.querySelector('.day-location')) title.querySelector('.day-location').textContent = loc;
 
   if (dayId) {
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem('france2026-day-headers') || '{}'); } catch(e) {}
-    saved[dayId] = { desc: desc, loc: loc };
+    saved[dayId] = { ctx: ctx, desc: desc, loc: loc };
     try { localStorage.setItem('france2026-day-headers', JSON.stringify(saved)); } catch(e) {}
     fbWrite('day-headers', saved);
   }
@@ -4653,6 +4668,7 @@ function cancelDayHeader(btn) {
     var h = saved[dayId];
     if (h) {
       var title = row.querySelector('.day-card-title');
+      if (h.ctx  && title.querySelector('.day-context'))  title.querySelector('.day-context').textContent  = h.ctx;
       if (h.desc && title.querySelector('.day-desc'))     title.querySelector('.day-desc').textContent     = h.desc;
       if (h.loc  && title.querySelector('.day-location')) title.querySelector('.day-location').textContent = h.loc;
     }
