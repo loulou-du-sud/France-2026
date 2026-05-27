@@ -328,6 +328,12 @@ section.visible { display: block; }
   font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--stone); margin-bottom: 3px;
 }
+.day-context {
+  font-family: 'Karla', sans-serif;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--stone);
+  line-height: 1.2; margin-bottom: 4px;
+}
 .day-desc {
   font-family: 'Cormorant Garamond', serif; font-style: italic;
   font-size: 20px; font-weight: 400; color: var(--ink); line-height: 1.2;
@@ -1784,7 +1790,8 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Thursday</div>
-          <div class="day-desc">LG Departs JFK ✈️</div>
+          <div class="day-context">Queen P. Reigns Over NYC</div>
+          <div class="day-desc">LG Departure ✈️</div>
           <div class="day-location">New York → Lisbon</div>
         </div>
         <button class="day-header-edit-btn" onclick="event.stopPropagation(); toggleDayHeaderEdit(this)">Edit</button><div class="day-chevron">›</div>
@@ -1812,6 +1819,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Friday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Lisbon → Paris → Avignon</div>
           <div class="day-location">TP 434 + TGV INOUI 6187</div>
         </div>
@@ -1830,6 +1838,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Saturday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Family in the Pyrenees ⛰️</div>
           <div class="day-location">Prat-Bonrepaux</div>
         </div>
@@ -1852,6 +1861,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Sunday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Pyrenees ⛰️</div>
           <div class="day-location">Prat-Bonrepaux</div>
         </div>
@@ -1869,6 +1879,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Monday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Pyrenees ⛰️</div>
           <div class="day-location">Prat-Bonrepaux</div>
         </div>
@@ -1886,6 +1897,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Tuesday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Toulouse 🏙️</div>
           <div class="day-location">Pink City</div>
         </div>
@@ -1904,6 +1916,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Wednesday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Toulouse 🏙️</div>
           <div class="day-location">Pink City</div>
         </div>
@@ -1921,6 +1934,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Thursday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Exploring Provence</div>
         </div>
@@ -1938,6 +1952,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Friday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Exploring Provence</div>
         </div>
@@ -1955,6 +1970,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Saturday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Exploring Provence</div>
         </div>
@@ -1972,6 +1988,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Sunday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Exploring Provence</div>
         </div>
@@ -1989,6 +2006,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Monday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Exploring Provence</div>
         </div>
@@ -2006,6 +2024,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Tuesday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Last days solo</div>
         </div>
@@ -2023,6 +2042,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Wednesday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Last days solo</div>
         </div>
@@ -2040,6 +2060,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Thursday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Last days solo</div>
         </div>
@@ -2057,6 +2078,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Friday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Last days solo</div>
         </div>
@@ -2074,6 +2096,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Saturday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Last days solo</div>
         </div>
@@ -2091,6 +2114,7 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Sunday</div>
+          <div class="day-context">Queen P. in NYC 🗽</div>
           <div class="day-desc">Avignon ☀️</div>
           <div class="day-location">Last days solo</div>
         </div>
@@ -2108,7 +2132,8 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Monday</div>
-          <div class="day-desc">Departs JFK ✈️</div>
+          <div class="day-context">LG Solo in Avignon ☀️</div>
+          <div class="day-desc">Queen P. Departs JFK ✈️</div>
           <div class="day-location">Delta DL0264</div>
         </div>
         <button class="day-header-edit-btn" onclick="event.stopPropagation(); toggleDayHeaderEdit(this)">Edit</button><div class="day-chevron">›</div>
@@ -2124,7 +2149,8 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
         </div>
         <div class="day-card-title">
           <div class="day-dow">Tuesday</div>
-          <div class="day-desc">Paris 🗼</div>
+          <div class="day-context">LG Solo in Avignon ☀️</div>
+          <div class="day-desc">Queen P. in Paris 🗼</div>
           <div class="day-location">CDG · overnight in Paris</div>
         </div>
         <button class="day-header-edit-btn" onclick="event.stopPropagation(); toggleDayHeaderEdit(this)">Edit</button><div class="day-chevron">›</div>
