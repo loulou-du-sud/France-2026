@@ -3388,6 +3388,7 @@ var MAP_STOPS = [
   { label:'Toulon',         sub:'Jul 19 · THE WEDDING 5 PM 💍🎉',              lat:43.124, lng:5.928,  cls:'wedding' },
   { label:'Porquerolles',   sub:'Jul 22 · Island day trip ⛵🏝️',               lat:43.001, lng:6.200,  cls:'' },
   { label:'Marseille',      sub:'Jul 22–23 · MUCEM ⚓',                         lat:43.296, lng:5.369,  cls:'' },
+  { label:'Cassis',         sub:'Jul 23–24 · Calanques 🏞️',                          lat:43.215, lng:5.537,  cls:'' },
   { label:'Aix-en-Provence',sub:'Jul 24–26 · Markets & Cézanne ☀️',           lat:43.529, lng:5.447,  cls:'provence' },
   { label:'Arles',          sub:'Jul 27–28 · Van Gogh & nail salon 💅',         lat:43.676, lng:4.627,  cls:'provence' },
 ];
@@ -3434,7 +3435,7 @@ function initLeafletMap() {
   // Dashed route line
   var routeCoords = [
     [48.856,2.352],[43.085,1.065],[43.604,1.444],[43.949,4.805],
-    [43.119,5.800],[43.124,5.928],[43.001,6.200],[43.296,5.369],
+    [43.119,5.800],[43.124,5.928],[43.001,6.200],[43.296,5.369],[43.215,5.537],
     [43.529,5.447],[43.676,4.627],[43.949,4.805],[48.856,2.352]
   ];
   L.polyline(routeCoords, { color:'#c07030', weight:2.5, opacity:0.55, dashArray:'8 10' }).addTo(_tripMap);
@@ -3454,7 +3455,6 @@ function initLeafletMap() {
         '<div class="map-popup-inner">' +
           '<strong>' + stop.label + '</strong>' +
           '<span class="pop-date">' + stop.sub.split('·')[0].trim() + '</span>' +
-          '<span class="pop-desc">' + stop.sub.split('·').slice(1).join('·').trim() + '</span>' +
         '</div>',
         { closeButton: false, maxWidth: 220 }
       );
