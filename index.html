@@ -3923,10 +3923,30 @@ function fbWrite(path, data) {
   dynLoad();
 
   // ── Give all hardcoded lodge/dining entries an edit pencil ──────────────────
+  function deleteStaticItem(btn) {
+    var entry = btn.closest('.lodge-option, .dining-entry');
+    if (!entry) return;
+    var origKey = entry.dataset.origKey || '';
+    var staticDeleted = {};
+    try { staticDeleted = JSON.parse(localStorage.getItem(STATIC_DEL_KEY) || '{}'); } catch(e) {}
+    if (origKey) staticDeleted[origKey] = true;
+    try { localStorage.setItem(STATIC_DEL_KEY, JSON.stringify(staticDeleted)); } catch(e) {}
+    fbWrite('static-deleted', staticDeleted);
+    entry.remove();
+  }
+
   (function initStaticEdits() {
     // Restore previously-saved notes for static entries
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem('france2026-static-notes') || '{}'); } catch(e) {}
+
+    // Remove static items the user has previously deleted
+    var staticDeleted = {};
+    try { staticDeleted = JSON.parse(localStorage.getItem(STATIC_DEL_KEY) || '{}'); } catch(e) {}
+    document.querySelectorAll('.lodge-option:not([data-added]), .dining-entry:not([data-added])').forEach(function(e) {
+      var nEl = e.querySelector('.lodge-option-name, .dining-entry-name');
+      if (nEl && staticDeleted[nEl.textContent.trim()]) e.remove();
+    });
 
     document.querySelectorAll('.lodge-option, .dining-entry').forEach(function(entry) {
       if (entry.querySelector('.item-actions')) return; // dynamic entry already has buttons
@@ -3962,7 +3982,9 @@ function fbWrite(path, data) {
       // Inject item-actions
       var actions = document.createElement('div');
       actions.className = 'item-actions';
-      actions.innerHTML = '<button class="ia-btn" onclick="openItemEdit(this)" title="Edit">✏️</button>';
+      actions.innerHTML =
+        '<button class="ia-btn" onclick="openItemEdit(this)" title="Edit">✏️</button>' +
+        '<button class="ia-btn del" onclick="deleteStaticItem(this)" title="Delete">×</button>';
       entry.appendChild(actions);
 
       // Inject item-edit-form (with note field for lodge entries)
@@ -3985,6 +4007,7 @@ function fbWrite(path, data) {
 
   // ── BOOK A LODGING OPTION ─────────────────────────────────────────────────
   var BOOKED_KEY = 'france2026-booked';
+  var STATIC_DEL_KEY = 'france2026-static-deleted';
 
   function _applyBooking(stop, bookedName) {
     var optionsDiv = stop.querySelector('.lodge-options');
