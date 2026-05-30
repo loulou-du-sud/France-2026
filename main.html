@@ -925,6 +925,40 @@ body.edit-mode .day-row.expandable .day-desc::after { display: none; }
       font-size: 11px; color: var(--stone-lt); margin-top: 2px;
     }
 
+    .lodge-conf-num {
+      font-family: 'Karla', sans-serif; font-size: 11px;
+      color: #2a8a40; margin-top: 3px; letter-spacing: 0.02em;
+    }
+    .lodge-conf-form {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--rule); width: 100%;
+      flex-wrap: wrap;
+    }
+    .lodge-conf-form input {
+      font-family: 'Karla', sans-serif; font-size: 13px;
+      border: 1px solid var(--rule); border-radius: 4px;
+      padding: 4px 8px; flex: 1; min-width: 140px;
+      color: var(--ink); background: #fff;
+    }
+    .lodge-conf-form .conf-save-btn,
+    .lodge-conf-form .conf-skip-btn {
+      font-family: 'Karla', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border: none; border-radius: 20px; padding: 4px 12px;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    }
+    .lodge-conf-form .conf-save-btn {
+      background: var(--terra); color: #fff;
+      border: 1px solid var(--terra);
+    }
+    .lodge-conf-form .conf-save-btn:hover { background: #a05020; }
+    .lodge-conf-form .conf-skip-btn {
+      background: none; color: var(--stone-lt);
+      border: 1px solid rgba(0,0,0,0.12);
+    }
+    .lodge-conf-form .conf-skip-btn:hover { background: #f0ede8; }
+
     .lodge-badge {
       font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
       font-weight: 700; padding: 4px 10px; border-radius: 20px;
@@ -4009,7 +4043,7 @@ function fbWrite(path, data) {
   var BOOKED_KEY = 'france2026-booked';
   var STATIC_DEL_KEY = 'france2026-static-deleted';
 
-  function _applyBooking(stop, bookedName) {
+  function _applyBooking(stop, bookedName, confNum) {
     var optionsDiv = stop.querySelector('.lodge-options');
     var bookedEntry = null;
 
@@ -4031,6 +4065,16 @@ function fbWrite(path, data) {
       if (opt === bookedEntry) {
         opt.classList.add('booked-choice');
         if (btn) btn.textContent = 'Booked ✓';
+        // Show confirmation number if provided
+        var oldConf = opt.querySelector('.lodge-conf-num');
+        if (oldConf) oldConf.remove();
+        if (confNum) {
+          var confEl = document.createElement('div');
+          confEl.className = 'lodge-conf-num';
+          confEl.textContent = 'Conf # ' + confNum;
+          var infoEl = opt.querySelector('.lodge-option-info');
+          if (infoEl) infoEl.appendChild(confEl);
+        }
       } else {
         opt.classList.add('struck');
         if (btn) btn.textContent = '✓ Book it';
@@ -4051,6 +4095,8 @@ function fbWrite(path, data) {
       opt.classList.remove('booked-choice', 'struck');
       var btn = opt.querySelector('.book-btn');
       if (btn) btn.textContent = '✓ Book it';
+      var confEl = opt.querySelector('.lodge-conf-num');
+      if (confEl) confEl.remove();
     });
     var badge = stop.querySelector('.lodge-badge');
     if (badge) { badge.className = 'lodge-badge to-book'; badge.textContent = 'To book'; }
@@ -4079,11 +4125,40 @@ function fbWrite(path, data) {
     if (alreadyBooked) {
       _clearBooking(stop);
       delete saved[key];
+      try { localStorage.setItem(BOOKED_KEY, JSON.stringify(saved)); } catch(e) {}
+      fbWrite('booked', saved);
     } else {
-      _applyBooking(stop, bookedName);
-      saved[key] = bookedName;
+      // Show inline confirmation number form before finalizing
+      var existing = entry.querySelector('.lodge-conf-form');
+      if (existing) { existing.remove(); return; }
+      var form = document.createElement('div');
+      form.className = 'lodge-conf-form';
+      form.dataset.bookKey    = key;
+      form.dataset.bookedName = bookedName;
+      form.innerHTML =
+        '<input type="text" class="lodge-conf-input" placeholder="Confirmation # (optional)"/>' +
+        '<button class="conf-save-btn" onclick="_finalizeBooking(this)">Save</button>' +
+        '<button class="conf-skip-btn" onclick="_finalizeBooking(this)">Skip</button>';
+      entry.appendChild(form);
+      setTimeout(function(){ form.querySelector('.lodge-conf-input').focus(); }, 0);
     }
+  }
 
+  function _finalizeBooking(btn) {
+    var form  = btn.closest('.lodge-conf-form');
+    var entry = form.closest('.lodge-option');
+    var stop  = entry.closest('.lodge-stop');
+    var key        = form.dataset.bookKey;
+    var bookedName = form.dataset.bookedName;
+    var confNum = '';
+    if (btn.classList.contains('conf-save-btn')) {
+      confNum = (form.querySelector('.lodge-conf-input').value || '').trim();
+    }
+    form.remove();
+    _applyBooking(stop, bookedName, confNum);
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(BOOKED_KEY) || '{}'); } catch(e) {}
+    saved[key] = { name: bookedName, conf: confNum };
     try { localStorage.setItem(BOOKED_KEY, JSON.stringify(saved)); } catch(e) {}
     fbWrite('booked', saved);
   }
@@ -4095,8 +4170,11 @@ function fbWrite(path, data) {
     var sec = document.getElementById('lodging');
     if (!sec) return;
     sec.querySelectorAll('.lodge-stop').forEach(function(stop, idx) {
-      var bookedName = saved['lodging|' + idx];
-      if (bookedName) _applyBooking(stop, bookedName);
+      var entry = saved['lodging|' + idx];
+      if (!entry) return;
+      var bookedName = typeof entry === 'string' ? entry : entry.name;
+      var confNum    = typeof entry === 'string' ? '' : (entry.conf || '');
+      if (bookedName) _applyBooking(stop, bookedName, confNum);
     });
   })();
 
