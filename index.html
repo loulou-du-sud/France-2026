@@ -3822,7 +3822,11 @@ var FB_URL = 'https://france-2026-96b3b-default-rtdb.firebaseio.com';
 function fbRead(path, cb) {
   fetch(FB_URL + '/' + path + '.json')
     .then(function(r) { return r.json(); })
-    .then(function(data) { cb(data); })
+    .then(function(data) {
+      // Firebase returns {"error":"..."} when rules block access — treat as no data
+      if (data && typeof data === 'object' && data.error) { cb(null); return; }
+      cb(data);
+    })
     .catch(function() { cb(null); });
 }
 
