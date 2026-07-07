@@ -3836,6 +3836,7 @@ function fbWrite(path, data) {
 
   // ── DYNAMIC PERSISTENCE (lodging / dining / activities) ──────────────────
   var DYN_KEY = 'france2026-dynamic-v1';
+  var _lastDynWrite = 0; // timestamp of last local dynamic write
 
   function _applyDynData(saved) {
     if (!saved) {
@@ -3883,6 +3884,7 @@ function fbWrite(path, data) {
     try { saved = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
     if (!saved[key]) saved[key] = [];
     saved[key].push({ name: name, url: url, domain: domain });
+    _lastDynWrite = Date.now();
     try { localStorage.setItem(DYN_KEY, JSON.stringify(saved)); } catch(e) {}
     fbWrite('dynamic', saved);
   }
@@ -4389,6 +4391,7 @@ function fbWrite(path, data) {
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
     if (items.length) saved[key] = items; else delete saved[key];
+    _lastDynWrite = Date.now();
     try { localStorage.setItem(DYN_KEY, JSON.stringify(saved)); } catch(e) {}
     fbWrite('dynamic', saved);
   }
@@ -4572,7 +4575,11 @@ function fbWrite(path, data) {
       var localStr = localStorage.getItem(DYN_KEY) || '{}';
       var fbStr = JSON.stringify(fbData);
       if (fbStr === localStr) return;
-      if (!document.querySelector('.item-edit-form.editing') && !document.querySelector('.lodge-add-name:focus, .lodge-add-url:focus, .dining-add-name:focus')) {
+      // Don't overwrite if user is editing, has an input focused, or wrote within the last 15s
+      var editOpen = document.querySelector('.dining-entry.editing, .lodge-option.editing');
+      var inputFocused = document.querySelector('.lodge-add-name:focus, .lodge-add-url:focus');
+      var recentWrite = (Date.now() - _lastDynWrite) < 15000;
+      if (!editOpen && !inputFocused && !recentWrite) {
         try { localStorage.setItem(DYN_KEY, fbStr); } catch(e) {}
         document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
         _applyDynData(fbData);
