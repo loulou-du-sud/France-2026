@@ -4625,6 +4625,7 @@ function fbWrite(path, data) {
           try { localStorage.setItem(DYN_KEY, mergedStr); } catch(e) {}
           document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
           _applyDynData(merged);
+        }
       }
     });
 
