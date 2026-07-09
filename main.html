@@ -3718,7 +3718,10 @@ var trackActivities = {};
 function loadTrackActivities() {
   try { var s = localStorage.getItem(TRACK_ACT_KEY); if(s) trackActivities = JSON.parse(s); } catch(e) {}
   fbRead('trackActivities', function(fbData) {
-    if (!fbData) return;
+    if (!fbData) {
+      if (Object.keys(trackActivities).length > 0) fbWrite('trackActivities', trackActivities);
+      return;
+    }
     trackActivities = fbData;
     try { localStorage.setItem(TRACK_ACT_KEY, JSON.stringify(fbData)); } catch(e) {}
     initTrackActivities();
@@ -3866,16 +3869,25 @@ function fbWrite(path, data) {
   function dynLoad() {
     // Render from localStorage immediately (fast)
     _applyDynData(null);
-    // Then sync from Firebase and re-render if different
+    // Merge with Firebase: local-only keys are pushed up; Firebase wins per-key on conflict
     fbRead('dynamic', function(fbData) {
-      if (!fbData) return;
-      var localStr = localStorage.getItem(DYN_KEY) || '{}';
+      var localData = {};
+      try { localData = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
+      if (!fbData) {
+        // Firebase empty — push local data up so other devices can sync
+        if (Object.keys(localData).length > 0) fbWrite('dynamic', localData);
+        return;
+      }
+      var merged = Object.assign({}, localData, fbData);
+      var mergedStr = JSON.stringify(merged);
+      var localStr = JSON.stringify(localData);
       var fbStr = JSON.stringify(fbData);
-      if (fbStr === localStr) return;
-      try { localStorage.setItem(DYN_KEY, fbStr); } catch(e) {}
-      // Remove existing added items and re-render with Firebase data
-      document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
-      _applyDynData(fbData);
+      if (mergedStr !== fbStr) fbWrite('dynamic', merged);
+      if (mergedStr !== localStr) {
+        try { localStorage.setItem(DYN_KEY, mergedStr); } catch(e) {}
+        document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
+        _applyDynData(merged);
+      }
     });
   }
 
@@ -4161,12 +4173,30 @@ function fbWrite(path, data) {
     try { saved = JSON.parse(localStorage.getItem(BOOKED_KEY) || '{}'); } catch(e) {}
     var sec = document.getElementById('lodging');
     if (!sec) return;
-    sec.querySelectorAll('.lodge-stop').forEach(function(stop, idx) {
-      var entry = saved['lodging|' + idx];
-      if (!entry) return;
-      var bookedName = typeof entry === 'string' ? entry : entry.name;
-      var confNum    = typeof entry === 'string' ? '' : (entry.conf || '');
-      if (bookedName) _applyBooking(stop, bookedName, confNum);
+    function applyBookedData(data) {
+      sec.querySelectorAll('.lodge-stop').forEach(function(stop) { _clearBooking(stop); });
+      sec.querySelectorAll('.lodge-stop').forEach(function(stop, idx) {
+        var entry = data['lodging|' + idx];
+        if (!entry) return;
+        var bookedName = typeof entry === 'string' ? entry : entry.name;
+        var confNum    = typeof entry === 'string' ? '' : (entry.conf || '');
+        if (bookedName) _applyBooking(stop, bookedName, confNum);
+      });
+    }
+    // Apply from localStorage immediately (fast)
+    applyBookedData(saved);
+    // Sync with Firebase
+    fbRead('booked', function(fbData) {
+      if (!fbData) {
+        if (Object.keys(saved).length > 0) fbWrite('booked', saved);
+        return;
+      }
+      var fbStr = JSON.stringify(fbData);
+      var localStr = JSON.stringify(saved);
+      if (fbStr !== localStr) {
+        try { localStorage.setItem(BOOKED_KEY, fbStr); } catch(e) {}
+        applyBookedData(fbData);
+      }
     });
   })();
 
@@ -4575,18 +4605,26 @@ function fbWrite(path, data) {
     });
 
     fbRead('dynamic', function(fbData) {
-      if (!fbData) return;
-      var localStr = localStorage.getItem(DYN_KEY) || '{}';
+      var localData = {};
+      try { localData = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
+      if (!fbData) {
+        if (Object.keys(localData).length > 0) fbWrite('dynamic', localData);
+        return;
+      }
+      var merged = Object.assign({}, localData, fbData);
+      var mergedStr = JSON.stringify(merged);
+      var localStr = JSON.stringify(localData);
       var fbStr = JSON.stringify(fbData);
-      if (fbStr === localStr) return;
-      // Don't overwrite if user is editing, has an input focused, or wrote within the last 15s
-      var editOpen = document.querySelector('.dining-entry.editing, .lodge-option.editing');
-      var inputFocused = document.querySelector('.lodge-add-name:focus, .lodge-add-url:focus');
-      var recentWrite = (Date.now() - _lastDynWrite) < 15000;
-      if (!editOpen && !inputFocused && !recentWrite) {
-        try { localStorage.setItem(DYN_KEY, fbStr); } catch(e) {}
-        document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
-        _applyDynData(fbData);
+      if (mergedStr !== fbStr) fbWrite('dynamic', merged);
+      if (mergedStr !== localStr) {
+        // Don't overwrite if user is editing, has an input focused, or wrote within the last 15s
+        var editOpen = document.querySelector('.dining-entry.editing, .lodge-option.editing');
+        var inputFocused = document.querySelector('.lodge-add-name:focus, .lodge-add-url:focus');
+        var recentWrite = (Date.now() - _lastDynWrite) < 15000;
+        if (!editOpen && !inputFocused && !recentWrite) {
+          try { localStorage.setItem(DYN_KEY, mergedStr); } catch(e) {}
+          document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
+          _applyDynData(merged);
       }
     });
 
