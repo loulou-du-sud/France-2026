@@ -3823,7 +3823,7 @@ setTimeout(initAllDayDetails, 50);
 var FB_URL = 'https://france-2026-96b3b-default-rtdb.firebaseio.com';
 
 function fbRead(path, cb) {
-  fetch(FB_URL + '/' + path + '.json')
+  fetch(FB_URL + '/' + path + '.json?nc=' + Date.now(), { cache: 'no-store' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
       // Firebase returns {"error":"..."} when rules block access — treat as no data
@@ -3959,6 +3959,11 @@ function fbWrite(path, data) {
   }
 
   dynLoad();
+
+  // Re-sync when iOS restores page from bfcache (back-forward cache skips JS re-run)
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) dynLoad();
+  });
 
   // ── Give all hardcoded lodge/dining entries an edit pencil ──────────────────
   function deleteStaticItem(btn) {
