@@ -3841,9 +3841,47 @@ function fbWrite(path, data) {
   }).catch(function(e) { console.warn('Firebase write failed:', e); });
 }
 
+function _connectDynSSE() {
+  if (_dynEvtSource) { try { _dynEvtSource.close(); } catch(x) {} _dynEvtSource = null; }
+  try {
+    var src = new EventSource(FB_URL + '/dynamic.json');
+    src.addEventListener('put', function(e) {
+      try {
+        var payload = JSON.parse(e.data);
+        var fbData = payload && payload.data;
+        if (fbData && typeof fbData === 'object' && fbData.error) fbData = null;
+        var localData = {};
+        try { localData = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(x) {}
+        if (!fbData) {
+          if (Object.keys(localData).length > 0) fbWrite('dynamic', localData);
+          return;
+        }
+        var merged = Object.assign({}, localData, fbData);
+        var mergedStr = JSON.stringify(merged);
+        var localStr = JSON.stringify(localData);
+        var fbStr = JSON.stringify(fbData);
+        if (mergedStr !== fbStr) fbWrite('dynamic', merged);
+        if (mergedStr !== localStr) {
+          var editOpen = document.querySelector('.dining-entry.editing, .lodge-option.editing');
+          var inputFocused = document.querySelector('.lodge-add-name:focus, .lodge-add-url:focus');
+          var recentWrite = (Date.now() - _lastDynWrite) < 15000;
+          if (!editOpen && !inputFocused && !recentWrite) {
+            try { localStorage.setItem(DYN_KEY, mergedStr); } catch(x) {}
+            document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
+            _applyDynData(merged);
+          }
+        }
+      } catch(x) {}
+    });
+    src.onerror = function() { _dynEvtSource = null; };
+    _dynEvtSource = src;
+  } catch(x) { _dynEvtSource = null; }
+}
+
   // ── DYNAMIC PERSISTENCE (lodging / dining / activities) ──────────────────
   var DYN_KEY = 'france2026-dynamic-v1';
   var _lastDynWrite = 0; // timestamp of last local dynamic write
+  var _dynEvtSource = null; // Firebase SSE connection for real-time dynamic sync
 
   function _applyDynData(saved) {
     if (!saved) {
@@ -3867,28 +3905,8 @@ function fbWrite(path, data) {
   }
 
   function dynLoad() {
-    // Render from localStorage immediately (fast)
-    _applyDynData(null);
-    // Merge with Firebase: local-only keys are pushed up; Firebase wins per-key on conflict
-    fbRead('dynamic', function(fbData) {
-      var localData = {};
-      try { localData = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
-      if (!fbData) {
-        // Firebase empty — push local data up so other devices can sync
-        if (Object.keys(localData).length > 0) fbWrite('dynamic', localData);
-        return;
-      }
-      var merged = Object.assign({}, localData, fbData);
-      var mergedStr = JSON.stringify(merged);
-      var localStr = JSON.stringify(localData);
-      var fbStr = JSON.stringify(fbData);
-      if (mergedStr !== fbStr) fbWrite('dynamic', merged);
-      if (mergedStr !== localStr) {
-        try { localStorage.setItem(DYN_KEY, mergedStr); } catch(e) {}
-        document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
-        _applyDynData(merged);
-      }
-    });
+    _applyDynData(null); // render from localStorage immediately
+    _connectDynSSE();    // connect SSE — first 'put' event delivers Firebase data
   }
 
   function dynSave(sectionId, stopEl, name, url, domain) {
@@ -3965,29 +3983,10 @@ function fbWrite(path, data) {
     if (e.persisted) { dynLoad(); loadTrackActivities(); }
   });
 
-  // Re-sync from Firebase when user returns to this tab — no localStorage flash
+  // Re-sync when user returns to tab — reconnect SSE (iOS drops connection in background)
   document.addEventListener('visibilitychange', function() {
     if (document.hidden) return;
-    // Sync dynamic items (lodging/dining/activities add-entries)
-    fbRead('dynamic', function(fbData) {
-      var localData = {};
-      try { localData = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
-      if (!fbData) {
-        if (Object.keys(localData).length > 0) fbWrite('dynamic', localData);
-        return;
-      }
-      var merged = Object.assign({}, localData, fbData);
-      var mergedStr = JSON.stringify(merged);
-      var localStr  = JSON.stringify(localData);
-      var fbStr     = JSON.stringify(fbData);
-      if (mergedStr !== fbStr) fbWrite('dynamic', merged);
-      if (mergedStr !== localStr) {
-        try { localStorage.setItem(DYN_KEY, mergedStr); } catch(e) {}
-        document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
-        _applyDynData(merged);
-      }
-    });
-    // Sync planned track activities
+    _connectDynSSE(); // reconnect: initial 'put' delivers latest Firebase data immediately
     loadTrackActivities();
   });
 
@@ -4635,30 +4634,7 @@ function fbWrite(path, data) {
       }
     });
 
-    fbRead('dynamic', function(fbData) {
-      var localData = {};
-      try { localData = JSON.parse(localStorage.getItem(DYN_KEY) || '{}'); } catch(e) {}
-      if (!fbData) {
-        if (Object.keys(localData).length > 0) fbWrite('dynamic', localData);
-        return;
-      }
-      var merged = Object.assign({}, localData, fbData);
-      var mergedStr = JSON.stringify(merged);
-      var localStr = JSON.stringify(localData);
-      var fbStr = JSON.stringify(fbData);
-      if (mergedStr !== fbStr) fbWrite('dynamic', merged);
-      if (mergedStr !== localStr) {
-        // Don't overwrite if user is editing, has an input focused, or wrote within the last 15s
-        var editOpen = document.querySelector('.dining-entry.editing, .lodge-option.editing');
-        var inputFocused = document.querySelector('.lodge-add-name:focus, .lodge-add-url:focus');
-        var recentWrite = (Date.now() - _lastDynWrite) < 15000;
-        if (!editOpen && !inputFocused && !recentWrite) {
-          try { localStorage.setItem(DYN_KEY, mergedStr); } catch(e) {}
-          document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
-          _applyDynData(merged);
-        }
-      }
-    });
+    if (!_dynEvtSource) _connectDynSSE(); // reconnect SSE if it dropped
 
     fbRead('notes', function(fbData) {
       if (!fbData || typeof fbData !== 'string') return;
