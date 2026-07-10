@@ -4532,7 +4532,6 @@ function _connectDynSSE() {
   }
   function deleteDynItem(btn) {
     var entry = btn.closest('.dining-entry, .lodge-option');
-    reSerializeStop(entry);   // serialize before removal
     // Remove this entry from the saved list
     var section   = entry.closest('section');
     var sectionId = section ? section.id : '';
