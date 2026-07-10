@@ -3911,7 +3911,7 @@ function _connectDynSSE() {
       } else {
         var merged = Object.assign({}, localData, fbData);
         if (_sk(merged) !== _sk(fbData)) fbWrite('dynamic', merged); // push local-only keys up
-        if (_sk(merged) !== _sk(localData)) {
+        if (_sk(merged) !== _sk(localData) && (Date.now() - _lastDynWrite) > 15000) {
           try { localStorage.setItem(DYN_KEY, JSON.stringify(merged)); } catch(e) {}
           document.querySelectorAll('.lodge-option[data-added], .dining-entry[data-added]').forEach(function(el) { el.remove(); });
           _applyDynData(merged);
@@ -4565,6 +4565,7 @@ function _connectDynSSE() {
       });
     });
     if (items.length) saved[key] = items; else delete saved[key];
+    _lastDynWrite = Date.now(); // prevent sync from restoring deleted item for 15s
     try { localStorage.setItem(DYN_KEY, JSON.stringify(saved)); } catch(e) {}
     fbWrite('dynamic', saved);
     entry.remove();
