@@ -3965,6 +3965,11 @@ function fbWrite(path, data) {
     if (e.persisted) dynLoad();
   });
 
+  // Re-sync immediately when user switches back to this tab (tab was backgrounded)
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) dynLoad();
+  });
+
   // ── Give all hardcoded lodge/dining entries an edit pencil ──────────────────
   function deleteStaticItem(btn) {
     var entry = btn.closest('.lodge-option, .dining-entry');
