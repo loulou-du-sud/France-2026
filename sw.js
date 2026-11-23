@@ -1,8 +1,8 @@
-// Service Worker — France Summer 2026
+// Service Worker — Training Log
 // Strategy: network-first for navigation, cache-first for assets.
-// Bump CACHE_VERSION whenever a new deploy goes out (done automatically via CI or manually).
+// Bump CACHE_VERSION whenever a new deploy goes out.
 
-const CACHE_VERSION = 'france-2026-v1';
+const CACHE_VERSION = 'training-log-v1';
 const SHELL = [
   '/France-2026/',
   '/France-2026/index.html'
